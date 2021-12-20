@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--
+            properties：配置标签
+            可以在该标签中配置数据库连接信息
+            也可以通过属性引用外部文件的其他信息
+                resource：指定资源文件名称
+                URL：统一资源定位符，可以唯一标识一个资源的位置
+                    http//localhost:8080/mybatis/test
+                    协议    主机ip   端口号    URI
+                    URI：同一资源标识符，在应用中可以唯一定位一个资源
+                    可以使用 file 协议定义资源的位置
+                    file:///F:/jdbc.properties
+            例如：${jdbc.driver}
+        -->
+    <properties resource="jdbc.properties">
+        <!--
+            property：指定一个信息内容
+                name：资源名
+                value：资源对应值
+            例如：${driver}
+        -->
+        <!--        <property name="driver" value="oracle.jdbc.OracleDriver"/>-->
+        <!--        <property name="url" value="jdbc:oracle:thin:@localhost:1521:xe"/>-->
+        <!--        <property name="username" value="lan"/>-->
+        <!--        <property name="password" value="1014"/>-->
+    </properties>
+
+    <!-- 设置 mybatis 的全局行为 -->
+    <settings>
+        <!--
+            name：设置其单个行为
+            value：设置该行为的状态
+        -->
+        <!--
+            logImpl：配置日志实现
+            STDOUT_LOGGING：标准日志，mybatis 自带的
+        -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+
+        <!-- true：开启 mybatis 全局延迟加载 -->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!-- false：允许通过方法触发立即加载，否则按需加载 -->
+        <setting name="aggressiveLazyLoading" value="false"/>
+
+        <!-- true：开启全局二级缓存 -->
+        <setting name="cacheEnabled" value="true"/>
+    </settings>
+
+    <!-- typeAliases：定义多个类的别名 -->
+    <typeAliases>
+        <!--
+             typeAlias：指定一个类型的别名
+                type：指定类的全限定名称
+                alias：指定该类的别名(简短，好记)
+        -->
+<!--        <typeAlias type="com.ssm.domain.Student" alias="stu" />-->
+        <!--
+             package：指定一个包中的所有类的别名都为自身类名
+                name：指定包的包名
+        -->
+        <package name="com.ssm.domain"/>
+    </typeAliases>
+
+
+    <!--
+        环境配置标签，一个数据库对应一个环境
+        一个SqlSessionFactory 实例只能选择一种环境
+        default：默认环境名，必须与配置一个对应环境 id
+    -->
+    <environments default="mysql">
+        <!-- 单个环境，id不能重复  -->
+        <environment id="mysql">
+            <!-- 事务管理器，type指定使用 JDBC 事务管理 -->
+            <transactionManager type="JDBC"/>
+            <!-- 数据源信息配置，type指定连接方式为连接池连接 -->
+            <dataSource type="POOLED">
+                <!-- 数据源连接需求信息，name对应的为固定值 -->
+                <!-- 数据库驱动全类名 -->
+                <property name="driver" value="${jdbc.driverClass}"/>
+                <!-- 数据库的 JDBC URL 地址-->
+                <property name="url" value="${jdbc.jdbcUrl}"/>
+                <!-- 数据库访问的用户名 -->
+                <property name="username" value="${jdbc.user}"/>
+                <!-- 数据库访问的密码 -->
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+    <!-- Mapper.xml 映射文件配置 -->
+    <mappers>
+        <!-- 一个 mapper 对应一个文件 -->
+        <!--
+            直接指定 dao 层包名，其中所有的接口和xml文件都会被扫描到
+            注意：这里使用 package 标签进行设置
+                 那么 xml 文件名必须和 Dao 接口名相同
+                 否则会出现匹配错误的异常
+        -->
+
+        <package name="com.ssm.dao"/>
+    </mappers>
+</configuration>

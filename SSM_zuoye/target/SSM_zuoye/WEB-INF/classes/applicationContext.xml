@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        https://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context
+        https://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop
+        https://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd">
+    <!--
+            context:component-scan 指定spring容器创建时需要扫描的空间
+                base-package：指定扫描的包的位置
+        -->
+    <context:component-scan base-package="com.ssm" >
+        <!-- 指定哪些注解扫描 -->
+        <!--        <context:include-filter type="" expression=""/>-->
+        <!-- 指定哪些注解不扫描 -->
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!-- 导入数据库配置文件 jdbc.properties -->
+
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+    <bean id="dataSource1" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="jdbcUrl" value="${jdbc.jdbcUrl}"></property>
+        <property name="driverClass" value="${jdbc.driverClass}"></property>
+        <property name="user" value="${jdbc.user}"></property>
+        <property name="password" value="${jdbc.password}"></property>
+    </bean>
+
+
+    <!-- 配置 mybatis -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 将数据源传入 -->
+        <property name="dataSource" ref="dataSource1" />
+        <property name="configLocation" value="classpath:mybatis.xml" />
+    </bean>
+
+    <!-- 配置 mybatis 扫描器，创建 dao 层代理对象 -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- 指定配置的 sqlSessionFactory id -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+        <!-- 指定需要扫描的包路径-->
+        <property name="basePackage" value="com.ssm.dao" />
+    </bean>
+
+<!--    配置事务管理器-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+            <property name="dataSource" ref="dataSource1" />
+    </bean>
+
+    <tx:advice id="interceptor" transaction-manager="transactionManager">
+
+        <tx:attributes>
+            <tx:method name="*" propagation="REQUIRED" read-only="false"/>
+            <tx:method name="find*" propagation="SUPPORTS" read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+
+
+<!--    aop-->
+    <aop:config>
+        <aop:pointcut id="ref" expression="execution(* com.ssm.service.*.*(..))" />
+        <aop:advisor advice-ref="interceptor" pointcut-ref="ref" />
+    </aop:config>
+
+
+    <tx:annotation-driven ></tx:annotation-driven>
+
+
+    <!--
+        配置事务通知，拦截器方式
+            transaction-manager：配置事务管理器引用 id
+    -->
+<!--    <tx:advice id="transactionAdvice"-->
+<!--               transaction-manager="transactionM">-->
+<!--        &lt;!&ndash;-->
+<!--            配置事务属性：-->
+<!--                isolation:用于指定事务的隔离级别。默认值是 DEFAULT-->
+<!--                            表示使用数据库的默认隔离级别。-->
+<!--                propagation:用于指定事务的传播行为。默认值是 REQUIRED 常用于增删改-->
+<!--                            查询方法可以选择 SUPPORTS。-->
+<!--                read-only:用于指定事务是否只读。默认值是false，表示读写。-->
+<!--                            只有查询方法才能设置为 true。-->
+<!--                timeout:用于指定事务的超时时间，默认值是-1，表示永不超时。-->
+<!--                            如果指定了数值，以秒为单位。-->
+<!--                rollback-for:用于指定一个异常，没有默认值，不设置表示任何异常都回滚-->
+<!--                            当产生该异常时，事务回滚，产生其他异常时，事务不回滚。-->
+<!--                no-rollback-for:用于指定一个异常，没有默认值，不设置表示任何异常都回滚-->
+<!--                            当产生该异常时，事务不回滚，产生其他异常时，事务回滚。-->
+<!--        &ndash;&gt;-->
+<!--        <tx:attributes>-->
+<!--            &lt;!&ndash;-->
+<!--                命名优先级：-->
+<!--                    具体名称 > 前置条件 > 通配符 > 后置条件-->
+<!--                   findById    find*       *      *ById-->
+<!--            &ndash;&gt;-->
+<!--            &lt;!&ndash; service包中的所有方法设置事务属性 &ndash;&gt;-->
+<!--            <tx:method name="*" propagation="REQUIRED" read-only="false"/>-->
+<!--            &lt;!&ndash; 将service包中的查询方法设置事务属性 &ndash;&gt;-->
+<!--            <tx:method name="find*" propagation="SUPPORTS" read-only="true" />-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
+
+<!--    &lt;!&ndash; 配置 aop &ndash;&gt;-->
+<!--    <aop:config>-->
+<!--        &lt;!&ndash; 配置公用切入点表达式 &ndash;&gt;-->
+<!--        <aop:pointcut id="pt1" expression="execution(* com..service.*.*(..))"/>-->
+<!--        &lt;!&ndash; 建立切入点表达式与事务通知的关系 &ndash;&gt;-->
+<!--        <aop:advisor advice-ref="transactionAdvice" pointcut-ref="pt1" />-->
+<!--    </aop:config>-->
+
+<!--    &lt;!&ndash; 开启 spring 事务注解支持 &ndash;&gt;-->
+<!--    <tx:annotation-driven transaction-manager="transactionM"></tx:annotation-driven>-->
+
+</beans>

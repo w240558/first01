@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <!--加载jdbc.properties配置文件-->
+    <properties resource="jdbc.properties" />
+
+    <!--配置驱动jar包的位置-->
+    <classPathEntry location="${jdbc.driverClassPath}" />
+
+    <!-- context 是逆向工程的主要配置信息 -->
+    <!-- id：起个名字 -->
+    <!-- targetRuntime：设置生成的文件适用于那个 mybatis 版本 -->
+    <context id="context1" targetRuntime="mybatis3">
+
+        <!-- 创建实体类时，生成toString -->
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+
+        <!-- 创建实体类时，生成serialVersionUID -->
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"/>
+
+        <!-- 是否去除自动生成的注释,true：是,false:否 -->
+        <commentGenerator>
+            <property name="suppressAllComments" value="true" />
+        </commentGenerator>
+
+        <!-- jdbc的数据库连接信息 -->
+        <jdbcConnection driverClass="${jdbc.driverClass}"
+                        connectionURL="${jdbc.jdbcUrl}"
+                        userId="${jdbc.user}"
+                        password="${jdbc.password}">
+        </jdbcConnection>
+
+        <!--
+            java模型生成器：用于逆向工程生成 java 实体类
+                targetPackage：生成的实体类所在的包位置
+                targetProject：生成的实体类所在的项目位置
+            最后生成路径：targetProject + targetPackage
+                        src/main/java/com/lan/pojo
+        -->
+        <javaModelGenerator targetPackage="com.ssm.domain"
+                            targetProject="src/main/java">
+            <!-- 是否对 modal 添加构造函数 -->
+            <property name="constructorBased" value="true" />
+            <!-- 设置是否在getter方法中，对String类型字段调用trim()方法 -->
+            <property name="trimStrings" value="true" />
+            <!-- 建立modal对象是否不可改变 即生成的modal对象不会有setter方法 -->
+            <property name="immutable" value="false" />
+        </javaModelGenerator>
+
+        <!-- mapper.xml文件生成器：用于逆向工程生成 mapper.xml 文件 -->
+        <sqlMapGenerator targetPackage="com.ssm.dao"
+                         targetProject="src/main/java">
+        </sqlMapGenerator>
+
+        <!--
+            java接口生成器：用于逆向工程生成 java dao层接口
+                type：选择怎么生成mapper接口（在MyBatis3/MyBatis3Simple下）：
+                    1，ANNOTATEDMAPPER：会生成使用Mapper接口+Annotation的方式创建（SQL生成在annotation中），不会生成对应的XML；
+                    2，MIXEDMAPPER：使用混合配置，会生成Mapper接口，并适当添加合适的Annotation，但是XML会生成在XML中；
+                    3，XMLMAPPER：会生成Mapper接口，接口完全依赖XML；
+                注意，如果context是MyBatis3Simple：只支持ANNOTATEDMAPPER和XMLMAPPER
+        -->
+        <javaClientGenerator targetPackage="com.ssm.dao"
+                             targetProject="src/main/java"
+                             type="XMLMAPPER">
+        </javaClientGenerator>
+
+        <!--
+            tableName：数据库中的表名
+            domainObjectName：生成的JAVA模型名
+            后续所有 example 结尾都是设置生成示例，false为不创造
+            selectByExampleQueryId：是否生成通过 id 查询的语句
+        -->
+        <table tableName="student" domainObjectName="Student"
+               enableCountByExample="false" enableUpdateByExample="false"
+               enableDeleteByExample="false" enableSelectByExample="false"
+               selectByExampleQueryId="false"></table>
+    </context>
+</generatorConfiguration>
